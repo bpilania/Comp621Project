@@ -1,5 +1,6 @@
 package natlab.toolkits.analysis;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -14,7 +15,7 @@ import com.google.common.collect.Sets;
  *
  * @see java.util.HashSet
  */
-public class HashSetFlowSet<D> extends AbstractFlowSet<D>
+public class HashSetFlowSet<D> extends AbstractFlowSet<D> implements Serializable
 {
     protected HashSet<D> set;
 

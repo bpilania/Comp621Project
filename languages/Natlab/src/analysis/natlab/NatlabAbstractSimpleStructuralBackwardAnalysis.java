@@ -33,7 +33,9 @@ import java.util.*;
  */
 public abstract class NatlabAbstractSimpleStructuralBackwardAnalysis<A> extends analysis.AbstractStructuralBackwardAnalysis<A>
 {
-
+	public NatlabAbstractSimpleStructuralBackwardAnalysis(){
+		
+	}
     public NatlabAbstractSimpleStructuralBackwardAnalysis(ASTNode tree){
         super( tree );
     }

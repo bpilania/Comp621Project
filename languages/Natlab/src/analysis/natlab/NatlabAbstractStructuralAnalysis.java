@@ -38,6 +38,9 @@ public abstract class NatlabAbstractStructuralAnalysis<A > extends nodecases.Abs
 
     protected boolean analyzed = false;
 
+    public NatlabAbstractStructuralAnalysis(){
+    	
+    }
     public NatlabAbstractStructuralAnalysis(ASTNode tree){
         this.tree = tree;
 

@@ -32,6 +32,9 @@ public abstract class NatlabAbstractStructuralBackwardAnalysis<A> extends analys
 
     protected Stack<LoopFlowsets> loopStack = new Stack<LoopFlowsets>();
 
+    public NatlabAbstractStructuralBackwardAnalysis(){
+    	
+    }
     public NatlabAbstractStructuralBackwardAnalysis(ASTNode tree){
         super( tree );
         helper = new BackwardsAnalysisHelper<A>( this );

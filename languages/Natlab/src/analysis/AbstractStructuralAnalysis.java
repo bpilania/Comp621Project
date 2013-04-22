@@ -24,7 +24,9 @@ package analysis;
  */
 public abstract class AbstractStructuralAnalysis<A> extends analysis.natlab.NatlabAbstractStructuralAnalysis<A>
 {
-    public AbstractStructuralAnalysis(ast.ASTNode tree){
+	public AbstractStructuralAnalysis(ast.ASTNode tree){
         super( tree );
+    }
+	public AbstractStructuralAnalysis(){
     }
 }
