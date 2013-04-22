@@ -2,6 +2,7 @@ package analysis;
 
 import java.io.Serializable;
 import java.util.BitSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -26,19 +27,21 @@ import ast.WhileStmt;
  * parameters, global variables, or persistent variables. (It just maps variable
  * names to assignment statements). It also doesn't handle nested functions.
  */
-public class LivenessNew extends
+public class CopyOfLivenessNew extends
 		AbstractSimpleStructuralBackwardAnalysis<BitVectorFlowVector> implements Serializable{
 	// Factory method, instantiates and runs the analysis
 	private static VFPreorderAnalysis reorderAnalysis;
-
-	public static LivenessNew of(ASTNode<?> tree) {
+	public HashMap<String, Integer> map = new HashMap<String,Integer>();
+	public HashMap<Integer, String> invMap = new HashMap<Integer, String>();
+	public int count = -1;
+	public static CopyOfLivenessNew of(ASTNode<?> tree) {
 		reorderAnalysis = new VFPreorderAnalysis(tree);
 		reorderAnalysis.analyze();
-		LivenessNew analysis = new LivenessNew(tree);
+		CopyOfLivenessNew analysis = new CopyOfLivenessNew(tree);
 		analysis.analyze();
 		return analysis;
 	}
-	public LivenessNew(){
+	public CopyOfLivenessNew(){
 		
 	}
 
@@ -49,7 +52,7 @@ public class LivenessNew extends
 		getTree().analyze(this.new Printer());
 	}
 
-	private LivenessNew(ASTNode tree) {
+	private CopyOfLivenessNew(ASTNode tree) {
 		super(tree);
 		currentInSet = newInitialFlow();
 		currentOutSet = newInitialFlow();
@@ -101,14 +104,16 @@ public class LivenessNew extends
 		
 		BitSet genBitSet = new BitSet();
 		for (String s : genSet) {
-			if(s.equalsIgnoreCase("a"))
-				genBitSet.set(0);
-			else if(s.equalsIgnoreCase("b"))
-				genBitSet.set(1);
-			else if(s.equalsIgnoreCase("c"))
-				genBitSet.set(2);
-			else if(s.equalsIgnoreCase("d"))
-				genBitSet.set(3);
+			if(!map.containsKey(s)){
+				count++;
+				map.put(s, count);
+				invMap.put(count, s);
+				genBitSet.set(count);
+			}
+			else{
+				int index = map.get(s);
+				genBitSet.set(index);
+			}
 			 
 		}
 		node.setGenBitSet(genBitSet);
@@ -116,17 +121,15 @@ public class LivenessNew extends
 		
 		BitSet killBitSet = new BitSet();
 		for (String s : killSet) {
-			if(s.equalsIgnoreCase("a")){
-				killBitSet.set(0);
+			if(!map.containsKey(s)){
+				count++;
+				map.put(s, count);
+				invMap.put(count, s);
+				killBitSet.set(count);
 			}
-			else if(s.equalsIgnoreCase("b")){
-				killBitSet.set(1);
-			}
-			else if(s.equalsIgnoreCase("c")){
-				killBitSet.set(2);
-			}
-			else if(s.equalsIgnoreCase("d")){
-				killBitSet.set(3);
+			else{
+				int index = map.get(s);
+				killBitSet.set(index);
 			}
 			 
 		}
@@ -134,14 +137,7 @@ public class LivenessNew extends
 		int outLength = currentOutSet.length();
 		killBitSet.flip(0,outLength);
 		node.setKillBitSet(killBitSet);
-		
-		
-		
-//		for (NameExpr s : node.getRHS().getNameExpressions()) {
-//			Set<AssignStmt> defs = new HashSet<AssignStmt>();
-//			defs.add(node);
-//			gen.add(s.getVarName());
-//		}
+
 		currentInSet = newInitialFlow();
 		currentInSet = currentOutSet.copy();
 		
@@ -157,30 +153,91 @@ public class LivenessNew extends
 		}
 	}
 	
+	@Override
+	public void caseScript(Script node) {
+		currentOutSet = newInitialFlow();
+		currentInSet = currentOutSet.copy();
+		outFlowSets.put(node, currentOutSet);
+
+		node.getStmts().analyze(this);
+
+		inFlowSets.put(node, currentInSet);
+	}
 
 
-//	@Override
-//	public void caseIfStmt(IfStmt node) {
-//		outFlowSets.put(node, currentOutSet.copy());
-//
-//		BitVectorFlowVector<String> gen = newInitialFlow();
-//		for (NameExpr s : node.getNameExpressions()) {
-//			Set<Stmt> defs = new HashSet<Stmt>();
-//			defs.add(node);
-//			gen.add(s.getVarName());
-//		}
-//		currentInSet = newInitialFlow();
-//		currentOutSet.copy(currentInSet);
-//		Set<String> kill = node.getLValues();
-//		Set<String> tempSet = currentInSet.getSet();
-//		tempSet.remove(kill.iterator().next());
-//		currentInSet.clear();
-//		currentInSet.addAll(tempSet);
-//
-//		currentInSet.union(gen);
-//		inFlowSets.put(node, currentInSet.copy());
-//	}
-//
+	@Override
+	public void caseIfStmt(IfStmt node) {
+		int flag = 0;
+
+		Set<String> killSet = node.getLValues();
+		Set<String> genSet = new LinkedHashSet<String>();
+		Set<NameExpr> setname = node.getAllNameExpressions();
+		for(NameExpr name : setname){
+			name.getVarName();
+			if (reorderAnalysis.getResult(name.getName()).isVariable() == true){
+				genSet.add(name.getVarName());
+			}
+			
+		}
+		if(killSet.containsAll(genSet) && genSet.containsAll(killSet))
+			flag = 1;
+		
+		if(flag == 0){
+		outFlowSets.put(node, currentOutSet.copy());
+		
+		BitSet genBitSet = new BitSet();
+		for (String s : genSet) {
+			if(!map.containsKey(s)){
+				count++;
+				map.put(s, count);
+				invMap.put(count, s);
+				genBitSet.set(count);
+			}
+			else{
+				int index = map.get(s);
+				genBitSet.set(index);
+			}
+			 
+		}
+		node.setGenBitSet(genBitSet);
+		
+		
+		BitSet killBitSet = new BitSet();
+		for (String s : killSet) {
+			if(!map.containsKey(s)){
+				count++;
+				map.put(s, count);
+				invMap.put(count, s);
+				killBitSet.set(count);
+			}
+			else{
+				int index = map.get(s);
+				killBitSet.set(index);
+			}
+			 
+		}
+		int lastIndex = killBitSet.length();
+		int outLength = currentOutSet.length();
+		killBitSet.flip(0,outLength);
+		node.setKillBitSet(killBitSet);
+
+		currentInSet = newInitialFlow();
+		currentInSet = currentOutSet.copy();
+		
+		currentInSet.and(killBitSet);
+		currentInSet.or(genBitSet);
+		
+		
+		inFlowSets.put(node, currentInSet.copy());
+		}
+		else{
+			outFlowSets.put(node, currentOutSet.copy());
+			inFlowSets.put(node, currentInSet);
+		}
+	}
+	
+	
+
 //	@Override
 //	public void caseWhileStmt(WhileStmt node) {
 //		outFlowSets.put(node, currentOutSet.copy());
@@ -203,27 +260,68 @@ public class LivenessNew extends
 //		inFlowSets.put(node, currentInSet.copy());
 //	}
 //
-//	@Override
-//	public void caseForStmt(ForStmt node) {
-//		outFlowSets.put(node, currentOutSet.copy());
-//
-//		BitVectorFlowVector<String> gen = newInitialFlow();
-//		for (NameExpr s : node.getNameExpressions()) {
-//			Set<Stmt> defs = new HashSet<Stmt>();
-//			defs.add(node);
-//			gen.add(s.getVarName());
-//		}
-//		currentInSet = newInitialFlow();
-//		currentOutSet.copy(currentInSet);
-//		Set<String> kill = node.getLValues();
-//		Set<String> tempSet = currentInSet.getSet();
-//		tempSet.remove(kill.iterator().next());
-//		currentInSet.clear();
-//		currentInSet.addAll(tempSet);
-//
-//		currentInSet.union(gen);
-//		inFlowSets.put(node, currentInSet.copy());
-//	}
+	@Override
+	public void caseForStmt(ForStmt node) {
+
+		Set<String> killSet = node.getLValues();
+		Set<String> genSet = new LinkedHashSet<String>();
+		Set<NameExpr> setname = node.getAllNameExpressions();
+		for(NameExpr name : setname){
+			name.getVarName();
+			if (reorderAnalysis.getResult(name.getName()).isVariable() == true){
+				genSet.add(name.getVarName());
+			}
+			
+		}
+
+		outFlowSets.put(node, currentOutSet.copy());
+		
+		BitSet genBitSet = new BitSet();
+		for (String s : genSet) {
+			if(!map.containsKey(s)){
+				count++;
+				map.put(s, count);
+				invMap.put(count, s);
+				genBitSet.set(count);
+			}
+			else{
+				int index = map.get(s);
+				genBitSet.set(index);
+			}
+			 
+		}
+		node.setGenBitSet(genBitSet);
+		
+		
+		BitSet killBitSet = new BitSet();
+		for (String s : killSet) {
+			if(!map.containsKey(s)){
+				count++;
+				map.put(s, count);
+				invMap.put(count, s);
+				killBitSet.set(count);
+			}
+			else{
+				int index = map.get(s);
+				killBitSet.set(index);
+			}
+			 
+		}
+		int lastIndex = killBitSet.length();
+		int outLength = currentOutSet.length();
+		killBitSet.flip(0,outLength);
+		node.setKillBitSet(killBitSet);
+
+		currentInSet = newInitialFlow();
+		currentInSet = currentOutSet.copy();
+		
+		currentInSet.and(killBitSet);
+		currentInSet.or(genBitSet);
+		
+		
+		inFlowSets.put(node, currentInSet.copy());
+		
+	}
 
 	// Copy is straightforward.
 	@Override
@@ -293,16 +391,9 @@ public class LivenessNew extends
 			}
 			int index = bvfv.nextSetBit(0);
 			while(index != -1){
-				String var=null;
 				
-				if(index == 0)
-					var = "a";
-				else if(index == 1)
-					var = "b";
-				else if(index == 2)
-					var = "c";
-				else if(index == 3)
-					var = "d";
+				
+				String var = invMap.get(index);
 				
 				System.out.print(var+",");
 				index = bvfv.nextSetBit(index+1);

@@ -9,6 +9,9 @@ public class BitVectorFlowVector extends BitSet{
 	 */
 	private static final long serialVersionUID = -7450558137279598705L;
 	
+	public BitVectorFlowVector(){
+		
+	}
 	
 	public BitVectorFlowVector copy(){
 		

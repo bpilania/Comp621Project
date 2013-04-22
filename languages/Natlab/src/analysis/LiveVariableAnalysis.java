@@ -19,23 +19,24 @@ import ast.Stmt;
  * Union Analysis.
  */
 
-public class LiveVarAnalysis extends
+public class LiveVariableAnalysis extends
 		AbstractSimpleStructuralBackwardAnalysis<HashSetFlowSet<String>> {
 	private static VFPreorderAnalysis reorderAnalysis;
 
-	public static LiveVarAnalysis of(ASTNode<?> tree) {
+	public static LiveVariableAnalysis of(ASTNode<?> tree) {
 		reorderAnalysis = new VFPreorderAnalysis(tree);
 		reorderAnalysis.analyze();
-		LiveVarAnalysis analysis = new LiveVarAnalysis(tree);
+		LiveVariableAnalysis analysis = new LiveVariableAnalysis(tree);
 		analysis.analyze();
 		return analysis;
 	}
+	static int compCount = 0;
 
 	public void prettyPrint() {
 		getTree().analyze(this.new Printer());
 	}
 
-	private LiveVarAnalysis(ASTNode tree) {
+	private LiveVariableAnalysis(ASTNode tree) {
 		super(tree);
 	}
 
@@ -99,7 +100,7 @@ public class LiveVarAnalysis extends
 
 		caseASTNode(node.getRHS());
 		// currentInSet.union(gen);
-
+		compCount++;
 		inFlowSets.put(node, currentInSet.copy());
 	}
 

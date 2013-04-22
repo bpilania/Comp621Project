@@ -29,7 +29,9 @@ import java.util.*;
  */
 public abstract class NatlabAbstractStructuralAnalysis<A > extends nodecases.AbstractNodeCaseHandler implements analysis.StructuralAnalysis<A>
 {
-
+	protected Set<String> genSet = new LinkedHashSet<String>();
+	public HashMap<String, Integer> map = new HashMap<String,Integer>();
+	public HashMap<Integer, String> invMap = new HashMap<Integer, String>();
     protected A currentOutSet;
     protected A currentInSet;
     protected Map<ASTNode,A> outFlowSets, inFlowSets;
