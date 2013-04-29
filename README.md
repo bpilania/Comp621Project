@@ -1,76 +1,29 @@
-McLab/Natlab
+Faster Intraprocedural Analysis of McLab
 ============
-
-
-[![Build status](https://travis-ci.org/Sable/mclab.png)](https://travis-ci.org/Sable/mclab)
-
-This is the Java-based infrastructure of the McLab project, which aims to
-provide compiler tools and infrastructure for MATLAB (and potentially other
-scientific languages in the future). In practice this repository houses
-development for the project's "static" branch, which includes the frontend
-(parsing, static analysis, refactoring, etc.), and work towards static
-compilation. (The "dynamic" branch's McVM project will be made available
-soon.)
 
 Overview
 --------
+This project aimed to improve McLab's static analysis framework i.e. McSAF. The detailed project report is added in the repository by the name of COMP_621_Project_Report.pdf
+The implementation, results and discussion are discussed in the project report.
 
-Proper developer documentation will eventually be here. A quick tour of
-the code:
 
-* `matlab` includes the Matlab to Natlab translator. 
-Natlab (nice Matlab) is a simplified version of Matlab that is easier to
-parse. (There are only syntactic differences between the two.)
-* `natlab` includes the generated Natlab parser, as well as
-`natlab.Main`, the entry point. 
-* `natlab.toolkits.rewrite` is a simple framework for AST transformations
-and simplifications. Some useful simplifications, such as conversion to
-three-address code, are provided.
-* `natlab.toolkits.analysis` is an (intraprocedural) dataflow analysis
-framework, and subpackages provide various common analyses. Of particular
-interest is the kind analysis, which lives in 
-`natlab.toolkits.analysis.varorfun`.
-* `natlab.refactoring` includes implementations of a few
-different refactorings, such as function and script inlining.
-* `natlab.tame` and its subpackages comprise the tamer framework, which
-aims to make Matlab more suitable to static compilation. It provides an
-intermediate representation (`natlab.tame.tir`), machinery for analyses
-to handle Matlab builtins, and an interprocedural analysis framework, among
-other things.
-* `natlab.backends` houses the Fortran and X10 backends. These build on
-top of the tamer, and are a work in progress.
-
-Working with the code
+My contribution to the mclab code
 ---------------------
-There exists an eclipse project (`.project`, `.classpath`) 
-which can be imported in eclipse.
+To facilitate the enduser with configuration, I have added complete mclab code in the repository. My contribution in the code is explained below:
+Package: mclab.languages.Natlab.src.analysis
+	1. ImprovedLiveVariableAnalysis.java : I wrote this file afresh and it implements live variable analysis using BitVector datastructure.
+	2. SerializeFlowVariables.java : I wrote this file as a part of serializing inFlowSets and outFlowSets. I no more use this file as this implementation produced negative results
+	3. Main.java : This file runs the new implementation and old implemetation for comparision of analysis times.
+	4. LiveVariableAnalysis.java : This file performs Live variable analysis using HashSetFlowSet datastructure.
+	5. BitVectorFlowVector.java : This file is being as datastructure in ImprovedLiveVariableAnalysis. It extends BitSet class of java and provides a copy function for cloning an object.
+	
+Package: mclab.languages.Natlab.gen.ast
+	1. ASTNode.java	: In this file, I added fields to saves the gen and kill set for each node in the tree. 
 
-There exist ant files (`build.xml`). 
-These can either build the projects on the command line, or in eclipse 
-(import in the `ant-view`) using the `eclipse.*` targets. The ant targets
-generate necessary code (like the Natlab AST). The command line ant targets
-also compile everything, while the eclipse targets do not -- eclipse will
-compile the code.
-
-(The build process contains a lot of cruft, duplication, some things are
-broken, etc. There is an ongoing effort to clean it up.)
-
-It is useful for analyses to have access to the library files of a Matlab
-installation. After `Natlab.jar` has been built with `ant jar`, you can run
-the `registerMatlabPathWithNatlab.m` script in Matlab; it just calls the
-Matlab `path` function and feeds its output to the jar.
 
 Disclaimer
 ----------
-Some of this code is confusing, poorly documented, and not well understood,
-as the grad students who wrote much of it have moved on to bigger and
-better things.  (This is fairly typical of research software.) Most of the
-documentation can be found in the various 
-[McLab publications](http://www.sable.mcgill.ca/mclab/Publications.html),
-but in many cases there are discrepancies between terminology used in
-papers and what's in the code. There is an ongoing effort to clean up the
-code and the build process, and document everything, so please bear with
-us as we work through this.
+
 
 Copyright and License
 ---------------------
