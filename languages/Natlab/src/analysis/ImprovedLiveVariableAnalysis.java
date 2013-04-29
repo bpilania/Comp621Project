@@ -20,6 +20,7 @@ import ast.Stmt;
 /**
  * This is a simple Live variable analysis. Live variable Analysis is a Backward
  * Union Analysis.
+ * Author: Bhaskar Pilania
  */
 
 public class ImprovedLiveVariableAnalysis extends
@@ -27,6 +28,7 @@ public class ImprovedLiveVariableAnalysis extends
 	private static VFPreorderAnalysis reorderAnalysis;
 
 	public int count = -1;
+	//Performs analysis on the AST for Kind analysis and analyze the tree nodes.
 	public static ImprovedLiveVariableAnalysis of(ASTNode<?> tree) {
 		reorderAnalysis = new VFPreorderAnalysis(tree);
 		reorderAnalysis.analyze();
@@ -34,6 +36,7 @@ public class ImprovedLiveVariableAnalysis extends
 		analysis.analyze();
 		return analysis;
 	}
+	//compCount and compSaveCount keep track of number of object cloning performed and number of object cloning saved
 	public static int compCount = 0;
 	public static int compSaveCount = 0;
 
@@ -50,11 +53,9 @@ public class ImprovedLiveVariableAnalysis extends
 		return new BitVectorFlowVector();
 	}
 
-	// Copy is straightforward.
+	// This function performs copies the object from source to destination.
 	@Override
 	public void copy(BitVectorFlowVector src, BitVectorFlowVector dest) {
-		
-		
 		
 		int index = src.nextSetBit(0);
 		
@@ -65,7 +66,7 @@ public class ImprovedLiveVariableAnalysis extends
 		
 	}
 
-
+	//merge function performs the merge operation required for fixed point computation.
 	@Override
 	public void merge(BitVectorFlowVector in1, BitVectorFlowVector in2,
 			BitVectorFlowVector out) {
@@ -81,6 +82,7 @@ public class ImprovedLiveVariableAnalysis extends
 	}
 	int flagCall = 0;
 
+	//caseNameExpr performs the kind analysis on the symbol and also union GEN set with the (out - kill)
 	@Override
 	public void caseNameExpr(NameExpr nameExp) {
 		if (reorderAnalysis.getResult(nameExp.getName()).isVariable() == true )
@@ -102,7 +104,10 @@ public class ImprovedLiveVariableAnalysis extends
 
 		}
 	}
-
+	/*caseAssignStmt computes (out - kill) expression for a statement. It also checks if the inFlowSets and outFlowSets have
+	 * changed since te last statement. If the inflowsets and outflow sets have not changed then the function prevents the recomputation
+	 * of these variables. Flag variable is being used to track the changes in these objects. 
+	 * */
 	@Override
 	public void caseAssignStmt(AssignStmt node) {
 		int flag = 0;

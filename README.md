@@ -20,6 +20,8 @@ Package: mclab.languages.Natlab.src.analysis
 Package: mclab.languages.Natlab.gen.ast
 	1. ASTNode.java	: In this file, I added fields to saves the gen and kill set for each node in the tree. 
 
+Package: mclab.languages.Natlab
+	This package contains all the benchmarks that were used in the project for testing purposes.
 
 Disclaimer
 ----------

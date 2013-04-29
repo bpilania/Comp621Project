@@ -32,27 +32,27 @@ public class Main {
   public static void main(String[] args) throws IOException {
     // Parse the input files into an AST.
 	  args = new String[1];
-	  args[0] = "/home/bhaskar/mclab/languages/Natlab/Alphtrmed.m";
-	  args[0] = "/home/bhaskar/mclab/languages/Natlab/ImageSharing.m";
-	  args[0] = "/home/bhaskar/mclab/languages/Natlab/Direct.m";
-	  args[0] = "/home/bhaskar/mclab/languages/Natlab/erdosRenyi.m";
-
+	  /*Below are the benchmarks file to be fed to the program. The user is required to uncomment any one of the below line. 
+	   * Please ensure that only one of the below lines are uncommented at a time. By default, big.m is uncommented.
+	   */
+	  //args[0] = "/home/bhaskar/mclab/languages/Natlab/Alphtrmed.m";
+	  //args[0] = "/home/bhaskar/mclab/languages/Natlab/ImageSharing.m";
+	  //args[0] = "/home/bhaskar/mclab/languages/Natlab/Direct.m";
+	  //args[0] = "/home/bhaskar/mclab/languages/Natlab/erdosRenyi.m";
 	  args[0] = "/home/bhaskar/mclab/languages/Natlab/big.m";
-	  
-	  //args[0] = "/home/bhaskar/mclab/languages/Natlab/sujay.m";
+	  //args[0] = "/home/bhaskar/mclab/languages/Natlab/verify.m";
 
 	  
     CompilationUnits program = Parsing.files(args);
     
 
-    //final long startTime = System.currentTimeMillis();
     
     
     /*
      * 
-     * Lines below are intentionally commented. They were written as a part of Objective 3 of the project. Currently
-     * nullpointerexception is observed as ast.AssgnStmt is not serialized.
-     */
+     * Lines below are intentionally commented. They were written as a part of serializing inFlowSets and outFlowSets. 
+     * These lines are commented as this part of code is no more in use because of negative results.
+     
     
 //    SerializeFlowVariables sfvOld;
 //    try
@@ -77,12 +77,7 @@ public class Main {
 //  
     
     
-/*
- * 
- * Lines below are intentionally commented. They were written as a part of Objective 3 of the project. Currently
- * nullpointerexception is observed as ast.AssgnStmt is not serialized.
- */
-    
+
 //    
 //    SerializeFlowVariables sfv = new SerializeFlowVariables();
 //    sfv = ltry.getInstance();
@@ -102,8 +97,11 @@ public class Main {
 //    }
 //    
 //    
+ * 
+ */
     
-//    
+    //Below part of the code runs the original live variable analysis using HashSetFlowSet.
+  
     final long startTime1 = System.currentTimeMillis();
     for(int i=0; i<10; i++){
     Map<ASTNode<?>, LiveVariableAnalysis> analyses1 = 
@@ -119,7 +117,7 @@ public class Main {
     }
     }
     
-     //Report the analysis results.
+     // Below commented code prints the analysis. It was commented because for timing the analysis we should not include printing time.
 //    for (ASTNode<?> node : analyses1.keySet()) {
 //      System.out.println("Live Variable using original Datastructure ");
 //      analyses1.get(node).prettyPrint();
@@ -128,6 +126,10 @@ public class Main {
 	//System.out.println("compCount: "+LiveVariableAnalysis.compCount);
 
     final long endTime1 = System.currentTimeMillis();
+    
+    
+    
+    //Below part of the code runs the improved live variable analysis.
 
     System.out.println("Total execution time: " + (endTime1 - startTime1)/10);
     
@@ -148,7 +150,7 @@ public class Main {
       }
     }
     }
-// Report the analysis results.
+// Below commented code prints the analysis. It was commented because for timing the analysis we should not include printing time.
 //    for (ASTNode<?> node : analyses.keySet()) {
 //      System.out.println("Live Variable using Bit Vector Datastructure ");
 //      analyses.get(node).prettyPrint();
